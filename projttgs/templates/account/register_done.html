@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Class Routine Optimizer | Registration Successful</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+	<script src="https://use.fontawesome.com/releases/v5.0.8/js/all.js"></script>
+	
+	<style>
+		body {
+			padding-top: 3.5rem;
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			min-height: 100vh;
+		}
+		
+		.success-container {
+			max-width: 500px;
+			margin: 80px auto;
+			padding: 40px;
+			background: white;
+			border-radius: 10px;
+			box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+			text-align: center;
+		}
+		
+		.success-icon {
+			font-size: 80px;
+			color: #28a745;
+			margin-bottom: 20px;
+		}
+		
+		.success-container h2 {
+			color: #257a7a;
+			font-weight: bold;
+			margin-bottom: 15px;
+		}
+		
+		.success-container p {
+			color: #666;
+			font-size: 16px;
+			margin-bottom: 10px;
+		}
+		
+		.user-info {
+			background-color: #f8f9fa;
+			padding: 15px;
+			border-radius: 5px;
+			margin: 20px 0;
+		}
+		
+		.user-info strong {
+			color: #257a7a;
+		}
+		
+		.btn-login {
+			background-color: #257a7a;
+			border: none;
+			color: white;
+			padding: 12px 30px;
+			border-radius: 5px;
+			font-size: 16px;
+			font-weight: 600;
+			margin-top: 20px;
+			transition: all 0.3s;
+			text-decoration: none;
+			display: inline-block;
+		}
+		
+		.btn-login:hover {
+			background-color: #1a5a5a;
+			transform: translateY(-2px);
+			box-shadow: 0 5px 15px rgba(37, 122, 122, 0.3);
+			color: white;
+			text-decoration: none;
+		}
+	</style>
+</head>
+<body>
+	<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+		<a class="navbar-brand" href="{% url 'index' %}"><b>Class Routine Optimizer</b></a>
+		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+		<div class="collapse navbar-collapse" id="navbarCollapse">
+			<ul class="navbar-nav ml-auto">
+				<li class="nav-item">
+					<a class="nav-link" href="{% url 'index' %}">Home</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="{% url 'login' %}">Login</a>
+				</li>
+			</ul>
+		</div>
+	</nav>
+
+	<div class="success-container">
+		<div class="success-icon">
+			<i class="fas fa-check-circle"></i>
+		</div>
+		
+		<h2>Registration Successful!</h2>
+		
+		<p>Welcome to Class Routine Optimizer!</p>
+		
+		<div class="user-info">
+			<p><strong>Username:</strong> {{ new_user.username }}</p>
+			{% if new_user.first_name %}
+				<p><strong>Name:</strong> {{ new_user.first_name }}</p>
+			{% endif %}
+			{% if new_user.email %}
+				<p><strong>Email:</strong> {{ new_user.email }}</p>
+			{% endif %}
+		</div>
+		
+		<p>Your account has been created successfully. You can now login and start generating class routines.</p>
+		
+		<a href="{% url 'login' %}" class="btn btn-login">
+			<i class="fas fa-sign-in-alt"></i> Go to Login
+		</a>
+	</div>
+</body>
+</html>
+

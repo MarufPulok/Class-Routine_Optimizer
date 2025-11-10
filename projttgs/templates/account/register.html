@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Class Routine Optimizer | Register</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+	<script src="https://use.fontawesome.com/releases/v5.0.8/js/all.js"></script>
+	<link rel="stylesheet" type="text/css" href="{% load static %}{% static 'css/style.css' %}">
+	
+	<style>
+		body {
+			padding-top: 3.5rem;
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			min-height: 100vh;
+		}
+		
+		.register-container {
+			max-width: 500px;
+			margin: 60px auto;
+			padding: 40px;
+			background: white;
+			border-radius: 10px;
+			box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+		}
+		
+		.register-header {
+			text-align: center;
+			margin-bottom: 30px;
+		}
+		
+		.register-header h2 {
+			color: #257a7a;
+			font-weight: bold;
+			margin-bottom: 10px;
+		}
+		
+		.register-header p {
+			color: #666;
+			font-size: 14px;
+		}
+		
+		.form-group label {
+			color: #333;
+			font-weight: 500;
+			margin-bottom: 8px;
+		}
+		
+		.form-control {
+			border: 2px solid #e0e0e0;
+			border-radius: 5px;
+			padding: 12px 15px;
+			font-size: 14px;
+			transition: all 0.3s;
+		}
+		
+		.form-control:focus {
+			border-color: #257a7a;
+			box-shadow: 0 0 0 0.2rem rgba(37, 122, 122, 0.25);
+		}
+		
+		.errorlist {
+			list-style: none;
+			padding: 0;
+			margin: 5px 0 0 0;
+		}
+		
+		.errorlist li {
+			color: #dc3545;
+			font-size: 12px;
+			margin-top: 5px;
+		}
+		
+		.btn-register {
+			width: 100%;
+			background-color: #257a7a;
+			border: none;
+			color: white;
+			padding: 12px;
+			border-radius: 5px;
+			font-size: 16px;
+			font-weight: 600;
+			margin-top: 10px;
+			transition: all 0.3s;
+		}
+		
+		.btn-register:hover {
+			background-color: #1a5a5a;
+			transform: translateY(-2px);
+			box-shadow: 0 5px 15px rgba(37, 122, 122, 0.3);
+		}
+		
+		.login-link {
+			text-align: center;
+			margin-top: 20px;
+			padding-top: 20px;
+			border-top: 1px solid #e0e0e0;
+		}
+		
+		.login-link a {
+			color: #257a7a;
+			text-decoration: none;
+			font-weight: 500;
+		}
+		
+		.login-link a:hover {
+			text-decoration: underline;
+		}
+		
+		.back-home {
+			text-align: center;
+			margin-top: 15px;
+		}
+		
+		.back-home a {
+			color: #666;
+			text-decoration: none;
+			font-size: 14px;
+		}
+		
+		.back-home a:hover {
+			color: #257a7a;
+		}
+	</style>
+</head>
+<body>
+	<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+		<a class="navbar-brand" href="{% url 'index' %}"><b>Class Routine Optimizer</b></a>
+		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+		<div class="collapse navbar-collapse" id="navbarCollapse">
+			<ul class="navbar-nav ml-auto">
+				<li class="nav-item">
+					<a class="nav-link" href="{% url 'index' %}">Home</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="{% url 'help' %}">Help</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="{% url 'login' %}">Login</a>
+				</li>
+				<li class="nav-item active">
+					<a class="nav-link" href="{% url 'register' %}">Sign Up</a>
+				</li>
+			</ul>
+		</div>
+	</nav>
+
+	<div class="register-container">
+		<div class="register-header">
+			<h2><i class="fas fa-user-plus"></i> Create Account</h2>
+			<p>Sign up to start generating class routines</p>
+		</div>
+
+		<form method="post">
+			{% csrf_token %}
+			
+			<div class="form-group">
+				<label for="id_username"><i class="fas fa-user"></i> Username</label>
+				<input type="text" name="username" class="form-control" id="id_username" required autofocus>
+				{% if user_form.username.errors %}
+					<ul class="errorlist">{{ user_form.username.errors }}</ul>
+				{% endif %}
+			</div>
+
+			<div class="form-group">
+				<label for="id_first_name"><i class="fas fa-id-card"></i> First Name</label>
+				<input type="text" name="first_name" class="form-control" id="id_first_name">
+				{% if user_form.first_name.errors %}
+					<ul class="errorlist">{{ user_form.first_name.errors }}</ul>
+				{% endif %}
+			</div>
+
+			<div class="form-group">
+				<label for="id_email"><i class="fas fa-envelope"></i> Email</label>
+				<input type="email" name="email" class="form-control" id="id_email" required>
+				{% if user_form.email.errors %}
+					<ul class="errorlist">{{ user_form.email.errors }}</ul>
+				{% endif %}
+			</div>
+
+			<div class="form-group">
+				<label for="id_password"><i class="fas fa-lock"></i> Password</label>
+				<input type="password" name="password" class="form-control" id="id_password" required>
+				{% if user_form.password.errors %}
+					<ul class="errorlist">{{ user_form.password.errors }}</ul>
+				{% endif %}
+			</div>
+
+			<div class="form-group">
+				<label for="id_password2"><i class="fas fa-lock"></i> Confirm Password</label>
+				<input type="password" name="password2" class="form-control" id="id_password2" required>
+				{% if user_form.password2.errors %}
+					<ul class="errorlist">{{ user_form.password2.errors }}</ul>
+				{% endif %}
+			</div>
+
+			<button type="submit" class="btn btn-register">
+				<i class="fas fa-user-plus"></i> Create Account
+			</button>
+		</form>
+
+		<div class="login-link">
+			<p>Already have an account? <a href="{% url 'login' %}">Login here</a></p>
+		</div>
+
+		<div class="back-home">
+			<a href="{% url 'index' %}"><i class="fas fa-arrow-left"></i> Back to Home</a>
+		</div>
+	</div>
+</body>
+</html>
+
