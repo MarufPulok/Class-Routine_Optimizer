@@ -4,6 +4,7 @@
 <head>
   <title>{% block title %}{% endblock %}</title>
   <link href = "{% static "css/base.css" %}" rel="stylesheet">
+  {% block extra_head %}{% endblock %}
 </head>
 <body>
   <div id="header">
@@ -31,5 +32,15 @@
     {% block content %}
     {% endblock %}
   </div>
+
+  <!-- React and ReactDOM (for development - use built bundle in production) -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  
+  <!-- Built React components bundle -->
+  <script src="{% static 'js/react-components.js' %}"></script>
+  
+  {% block extra_scripts %}{% endblock %}
 </body>
 </html>

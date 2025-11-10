@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}React Component Example{% endblock %}
+
+{% block content %}
+<h1>React Component Integration Example</h1>
+
+<p>This page demonstrates how to use React components in Django templates.</p>
+
+<h2>Method 1: Auto-initialization with data attributes</h2>
+<div 
+  data-react-component="ExampleComponent"
+  data-props='{"title": "Auto-initialized Component", "initialCount": 10}'
+></div>
+
+<h2>Method 2: Manual initialization</h2>
+<div id="manual-component"></div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const { ExampleComponent, createRoot, React } = window.ReactComponents;
+    const root = createRoot(document.getElementById('manual-component'));
+    root.render(React.createElement(ExampleComponent, {
+      title: 'Manually Initialized Component',
+      initialCount: 5
+    }));
+  });
+</script>
+
+<h2>Method 3: Multiple instances</h2>
+<div 
+  data-react-component="ExampleComponent"
+  data-props='{"title": "Component 1", "initialCount": 0}'
+></div>
+
+<div 
+  data-react-component="ExampleComponent"
+  data-props='{"title": "Component 2", "initialCount": 20}'
+></div>
+{% endblock %}
+
