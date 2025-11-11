@@ -25,6 +25,7 @@ class RegisterView(APIView):
     Following Dependency Inversion Principle - depends on service abstraction.
     """
     permission_classes = [AllowAny]
+    serializer_class = UserRegistrationSerializer
     
     def __init__(self, **kwargs):
         """Initialize view with service dependencies."""
@@ -83,6 +84,7 @@ class LoginView(APIView):
     Following Dependency Inversion Principle - depends on service abstraction.
     """
     permission_classes = [AllowAny]
+    serializer_class = LoginSerializer
     
     def __init__(self, **kwargs):
         """Initialize view with service dependencies."""
@@ -128,6 +130,7 @@ class TokenRefreshView(APIView):
     Following Dependency Inversion Principle - depends on service abstraction.
     """
     permission_classes = [AllowAny]
+    serializer_class = TokenRefreshSerializer
     
     def __init__(self, **kwargs):
         """Initialize view with service dependencies."""
@@ -166,6 +169,7 @@ class LogoutView(APIView):
     User logout endpoint.
     """
     permission_classes = [IsAuthenticated]
+    serializer_class = TokenRefreshSerializer
     
     def post(self, request):
         """
@@ -195,6 +199,7 @@ class UserProfileView(APIView):
     Get current user profile.
     """
     permission_classes = [IsAuthenticated]
+    serializer_class = UserSerializer
     
     def get(self, request):
         """

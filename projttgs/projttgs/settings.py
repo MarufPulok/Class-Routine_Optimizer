@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     # Third-party apps
     'rest_framework',
     'rest_framework_simplejwt',
+    'drf_spectacular',
     'corsheaders',
     'django_extensions',
     
@@ -63,7 +64,7 @@ ROOT_URLCONF = 'projttgs.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -194,6 +195,7 @@ REST_FRAMEWORK = {
         'rest_framework.parsers.MultiPartParser',
     ],
     'EXCEPTION_HANDLER': 'rest_framework.views.exception_handler',
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 
@@ -250,6 +252,28 @@ EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
 EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
 EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.smtp.EmailBackend')
 
+
+# drf-spectacular settings for API documentation
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Class Routine Optimizer API',
+    'DESCRIPTION': 'Backend API for Class Routine Optimizer - A system for managing and generating class routines/timetables for universities.',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': True,
+    'COMPONENT_SPLIT_REQUEST': True,
+    'SCHEMA_PATH_PREFIX': '/api/',
+    'AUTHENTICATION_WHITELIST': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'SWAGGER_UI_SETTINGS': {
+        'deepLinking': True,
+        'persistAuthorization': True,
+        'displayOperationId': False,
+    },
+    'REDOC_UI_SETTINGS': {
+        'hideDownloadButton': False,
+    },
+}
 
 # Logging configuration
 LOGGING = {

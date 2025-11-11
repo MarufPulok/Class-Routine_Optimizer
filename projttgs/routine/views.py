@@ -98,6 +98,7 @@ class RoutineGenerationView(APIView):
     Following Dependency Inversion Principle - depends on service abstraction.
     """
     permission_classes = [IsAuthenticated]
+    serializer_class = RoutineGenerationSerializer
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -145,6 +146,7 @@ class RoutinePDFGenerationView(APIView):
     Following Dependency Inversion Principle - depends on service abstraction.
     """
     permission_classes = [IsAuthenticated]
+    serializer_class = RoutineGenerationSerializer
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
