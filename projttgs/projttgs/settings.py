@@ -114,7 +114,7 @@ else:
         alias='default'
     )
 
-# Django still needs a database setting (for admin, sessions, etc.)
+# Django still needs a database setting (for admin, sessions, auth, etc.)
 # Using SQLite for Django's built-in features
 DATABASES = {
     'default': {
