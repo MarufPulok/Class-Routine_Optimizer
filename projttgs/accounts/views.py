@@ -167,21 +167,31 @@ class TokenRefreshView(APIView):
 class LogoutView(APIView):
     """
     User logout endpoint.
+    Accepts refresh token only - no valid access token required.
     """
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     serializer_class = TokenRefreshSerializer
     
     def post(self, request):
         """
         Logout user (blacklist refresh token).
+        Works even when access token is expired/invalid.
         
         POST /api/accounts/logout/
+        Body: { "refresh": "refresh_token_string" }
         """
+        serializer = TokenRefreshSerializer(data=request.data)
+        
+        if not serializer.is_valid():
+            return Response(
+                {'errors': serializer.errors},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
         try:
-            refresh_token = request.data.get('refresh')
-            if refresh_token:
-                token = RefreshToken(refresh_token)
-                token.blacklist()
+            refresh_token = serializer.validated_data['refresh']
+            token = RefreshToken(refresh_token)
+            token.blacklist()
             
             return Response(
                 {'message': 'Logged out successfully'},

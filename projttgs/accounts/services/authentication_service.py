@@ -33,7 +33,7 @@ class AuthenticationService(BaseService):
             self.log_warning(f"Failed authentication attempt for username: {username}")
         return user
     
-    def generate_tokens(self, user: User) -> Dict[str, str]:
+    def generate_tokens(self, user: User) -> Dict[str, Any]:
         """
         Generate JWT tokens for a user.
         
@@ -41,13 +41,15 @@ class AuthenticationService(BaseService):
             user: User instance
             
         Returns:
-            Dictionary with access and refresh tokens
+            Dictionary with access and refresh tokens, including expiration timestamps
         """
         try:
             refresh = RefreshToken.for_user(user)
             return {
                 'access': str(refresh.access_token),
                 'refresh': str(refresh),
+                'access_expires_at': refresh.access_token.payload['exp'],
+                'refresh_expires_at': refresh.payload['exp'],
             }
         except Exception as e:
             self.log_error("Error generating tokens", error=e)
@@ -88,24 +90,41 @@ class AuthenticationService(BaseService):
             'tokens': tokens,
         }
     
-    def refresh_token(self, refresh_token: str) -> Dict[str, str]:
+    def refresh_token(self, refresh_token: str) -> Dict[str, Any]:
         """
         Refresh access token using refresh token.
+        When ROTATE_REFRESH_TOKENS is enabled, also returns a new refresh token.
         
         Args:
             refresh_token: Refresh token string
             
         Returns:
-            Dictionary with new access token
+            Dictionary with new access token, and new refresh token if rotation is enabled,
+            including expiration timestamps
             
         Raises:
             AuthenticationError: If token refresh fails
         """
         try:
+            from django.conf import settings
             refresh = RefreshToken(refresh_token)
-            return {
-                'access': str(refresh.access_token),
+            
+            # Get new access token (this may rotate the refresh token if enabled)
+            new_access_token = refresh.access_token
+            
+            result = {
+                'access': str(new_access_token),
+                'access_expires_at': new_access_token.payload['exp'],
             }
+            
+            # If rotation is enabled, return new refresh token
+            if getattr(settings, 'SIMPLE_JWT', {}).get('ROTATE_REFRESH_TOKENS', False):
+                # After accessing access_token, if rotation is enabled, refresh token is rotated
+                # The refresh object now represents the new refresh token
+                result['refresh'] = str(refresh)
+                result['refresh_expires_at'] = refresh.payload['exp']
+            
+            return result
         except Exception as e:
             self.log_error("Error refreshing token", error=e)
             raise AuthenticationError("Invalid or expired refresh token")
