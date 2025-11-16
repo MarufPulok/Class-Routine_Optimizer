@@ -20,4 +20,7 @@ urlpatterns = [
     path('', include(router.urls)),
     path('generate/', views.RoutineGenerationView.as_view(), name='generate'),
     path('generate-pdf/', views.RoutinePDFGenerationView.as_view(), name='generate-pdf'),
+    path('dashboard/stats/', views.DashboardStatsView.as_view(), name='dashboard-stats'),
+    path('sections/status/', views.SectionStatusView.as_view(), name='section-status'),
+    path('dashboard/generation-history/', views.GenerationHistoryView.as_view(), name='generation-history'),
 ]

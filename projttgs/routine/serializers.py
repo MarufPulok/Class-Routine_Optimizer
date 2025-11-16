@@ -288,3 +288,119 @@ class TimetableSerializer(serializers.Serializer):
     conflicts = serializers.IntegerField()
     generations = serializers.IntegerField()
 
+
+class GenerationHistorySerializer(serializers.Serializer):
+    """Serializer for generation history."""
+    id = serializers.CharField(read_only=True)
+    timestamp = serializers.DateTimeField(read_only=True)
+    fitness_score = serializers.FloatField(read_only=True)
+    conflicts_count = serializers.IntegerField(read_only=True)
+    generations_run = serializers.IntegerField(read_only=True)
+    status = serializers.CharField(read_only=True)
+    strategy_type = serializers.CharField(read_only=True)
+    parameters = serializers.DictField(read_only=True)
+    created_by = serializers.CharField(read_only=True, allow_null=True)
+    created_at = serializers.DateTimeField(read_only=True)
+
+
+class CountsSerializer(serializers.Serializer):
+    """Serializer for entity counts."""
+    rooms = serializers.IntegerField()
+    instructors = serializers.IntegerField()
+    courses = serializers.IntegerField()
+    departments = serializers.IntegerField()
+    sections = serializers.IntegerField()
+    meeting_times = serializers.IntegerField()
+    total_seating_capacity = serializers.IntegerField()
+
+
+class AssignmentsSerializer(serializers.Serializer):
+    """Serializer for assignment statistics."""
+    total_sections = serializers.IntegerField()
+    assigned_sections = serializers.IntegerField()
+    partially_assigned_sections = serializers.IntegerField()
+    unassigned_sections = serializers.IntegerField()
+    completion_percentage = serializers.FloatField()
+
+
+class RoomUtilizationItemSerializer(serializers.Serializer):
+    """Serializer for room utilization item."""
+    sections = serializers.IntegerField()
+    capacity = serializers.IntegerField()
+    utilization_percentage = serializers.FloatField()
+
+
+class UtilizationSerializer(serializers.Serializer):
+    """Serializer for utilization metrics."""
+    room_utilization = serializers.DictField(
+        child=RoomUtilizationItemSerializer(),
+        read_only=True
+    )
+    instructor_workload = serializers.DictField(
+        child=serializers.IntegerField(),
+        read_only=True
+    )
+    time_slot_distribution = serializers.DictField(
+        child=serializers.IntegerField(),
+        read_only=True
+    )
+    day_distribution = serializers.DictField(
+        child=serializers.IntegerField(),
+        read_only=True
+    )
+
+
+class ReadinessSerializer(serializers.Serializer):
+    """Serializer for system readiness."""
+    ready = serializers.BooleanField()
+    missing_items = serializers.ListField(child=serializers.CharField())
+
+
+class RecentGenerationSerializer(serializers.Serializer):
+    """Serializer for recent generation item."""
+    timestamp = serializers.CharField()
+    fitness_score = serializers.FloatField()
+    conflicts_count = serializers.IntegerField()
+    generations_run = serializers.IntegerField()
+    status = serializers.CharField()
+    strategy_type = serializers.CharField()
+
+
+class GenerationHistoryStatsSerializer(serializers.Serializer):
+    """Serializer for generation history statistics."""
+    total_generations = serializers.IntegerField()
+    average_fitness = serializers.FloatField()
+    best_fitness = serializers.FloatField()
+    average_conflicts = serializers.FloatField()
+    success_count = serializers.IntegerField()
+    failed_count = serializers.IntegerField()
+    recent_generations = RecentGenerationSerializer(many=True)
+
+
+class DashboardStatsSerializer(serializers.Serializer):
+    """Serializer for dashboard statistics."""
+    counts = CountsSerializer()
+    assignments = AssignmentsSerializer()
+    utilization = UtilizationSerializer()
+    readiness = ReadinessSerializer()
+    generation_history = GenerationHistoryStatsSerializer()
+
+
+class DepartmentStatusSerializer(serializers.Serializer):
+    """Serializer for department status."""
+    total = serializers.IntegerField()
+    fully_assigned = serializers.IntegerField()
+    partially_assigned = serializers.IntegerField()
+    unassigned = serializers.IntegerField()
+
+
+class SectionStatusSerializer(serializers.Serializer):
+    """Serializer for section status."""
+    fully_assigned = serializers.IntegerField()
+    partially_assigned = serializers.IntegerField()
+    unassigned = serializers.IntegerField()
+    by_department = serializers.DictField(
+        child=DepartmentStatusSerializer(),
+        read_only=True
+    )
+

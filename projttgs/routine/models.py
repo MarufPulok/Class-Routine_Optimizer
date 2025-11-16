@@ -149,3 +149,29 @@ class Section(Document):
     
     def __str__(self) -> str:
         return self.section_id
+
+
+class GenerationHistory(Document):
+    """Generation history model for tracking routine generation runs."""
+    timestamp = fields.DateTimeField(default=datetime.utcnow, required=True)
+    fitness_score = fields.FloatField(required=True)
+    conflicts_count = fields.IntField(required=True)
+    generations_run = fields.IntField(required=True)
+    status = fields.StringField(
+        max_length=10,
+        choices=[('Success', 'Success'), ('Failed', 'Failed')],
+        required=True
+    )
+    strategy_type = fields.StringField(max_length=50, default='genetic_algorithm')
+    parameters = fields.DictField(default=dict)  # population_size, max_generations, mutation_rate
+    created_by = fields.StringField(max_length=100, null=True)  # User ID or username
+    created_at = fields.DateTimeField(default=datetime.utcnow)
+    
+    meta = {
+        'collection': 'routine_generationhistory',
+        'indexes': ['-timestamp', 'status', 'created_by'],
+        'ordering': ['-timestamp']
+    }
+    
+    def __str__(self) -> str:
+        return f'Generation {self.timestamp} - Fitness: {self.fitness_score}'

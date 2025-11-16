@@ -12,15 +12,19 @@ from routine.models import Room, Instructor, MeetingTime, Course, Department, Se
 from routine.serializers import (
     RoomSerializer, InstructorSerializer, MeetingTimeSerializer,
     CourseSerializer, DepartmentSerializer, SectionSerializer,
-    RoutineGenerationSerializer, TimetableSerializer
+    RoutineGenerationSerializer, TimetableSerializer,
+    DashboardStatsSerializer, SectionStatusSerializer, GenerationHistorySerializer
 )
 from routine.repositories import (
     RoomRepository, InstructorRepository, MeetingTimeRepository,
     CourseRepository, DepartmentRepository, SectionRepository
 )
+from routine.repositories.generation_history_repository import GenerationHistoryRepository
 from routine.services.routine_generation_service import RoutineGenerationService
 from routine.services.pdf_generation_service import PDFGenerationService
+from routine.services.dashboard_service import DashboardService
 from core.exceptions import NotFoundError, ValidationError, RoutineGenerationError
+from datetime import datetime
 
 
 class RoomViewSet(viewsets.ModelViewSet):
@@ -126,14 +130,67 @@ class RoutineGenerationView(APIView):
                 mutation_rate=serializer.validated_data.get('mutation_rate', 0.1),
             )
             
+            # Save generation history
+            history_repo = GenerationHistoryRepository()
+            history_repo.create(
+                timestamp=datetime.utcnow(),
+                fitness_score=result.get('fitness', 0.0),
+                conflicts_count=result.get('conflicts', 0),
+                generations_run=result.get('generations', 0),
+                status='Success',
+                strategy_type=serializer.validated_data.get('strategy_type', 'genetic_algorithm'),
+                parameters={
+                    'population_size': serializer.validated_data.get('population_size', 9),
+                    'max_generations': serializer.validated_data.get('max_generations', 1000),
+                    'mutation_rate': serializer.validated_data.get('mutation_rate', 0.1),
+                },
+                created_by=request.user.username if hasattr(request.user, 'username') else None
+            )
+            
             response_serializer = TimetableSerializer(result)
             return Response(response_serializer.data, status=status.HTTP_200_OK)
         except RoutineGenerationError as e:
+            # Save failed generation history
+            try:
+                history_repo = GenerationHistoryRepository()
+                history_repo.create(
+                    timestamp=datetime.utcnow(),
+                    fitness_score=0.0,
+                    conflicts_count=0,
+                    generations_run=0,
+                    status='Failed',
+                    strategy_type=serializer.validated_data.get('strategy_type', 'genetic_algorithm'),
+                    parameters={
+                        'population_size': serializer.validated_data.get('population_size', 9),
+                        'max_generations': serializer.validated_data.get('max_generations', 1000),
+                        'mutation_rate': serializer.validated_data.get('mutation_rate', 0.1),
+                    },
+                    created_by=request.user.username if hasattr(request.user, 'username') else None
+                )
+            except Exception:
+                pass  # Don't fail if history save fails
+            
             return Response(
                 {'error': str(e.message)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
         except Exception as e:
+            # Save failed generation history
+            try:
+                history_repo = GenerationHistoryRepository()
+                history_repo.create(
+                    timestamp=datetime.utcnow(),
+                    fitness_score=0.0,
+                    conflicts_count=0,
+                    generations_run=0,
+                    status='Failed',
+                    strategy_type=serializer.validated_data.get('strategy_type', 'genetic_algorithm'),
+                    parameters=serializer.validated_data,
+                    created_by=request.user.username if hasattr(request.user, 'username') else None
+                )
+            except Exception:
+                pass  # Don't fail if history save fails
+            
             return Response(
                 {'error': 'Routine generation failed'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -176,15 +233,171 @@ class RoutinePDFGenerationView(APIView):
                 mutation_rate=serializer.validated_data.get('mutation_rate', 0.1),
             )
             
+            # Save generation history
+            history_repo = GenerationHistoryRepository()
+            history_repo.create(
+                timestamp=datetime.utcnow(),
+                fitness_score=result.get('fitness', 0.0),
+                conflicts_count=result.get('conflicts', 0),
+                generations_run=result.get('generations', 0),
+                status='Success',
+                strategy_type=serializer.validated_data.get('strategy_type', 'genetic_algorithm'),
+                parameters={
+                    'population_size': serializer.validated_data.get('population_size', 9),
+                    'max_generations': serializer.validated_data.get('max_generations', 1000),
+                    'mutation_rate': serializer.validated_data.get('mutation_rate', 0.1),
+                },
+                created_by=request.user.username if hasattr(request.user, 'username') else None
+            )
+            
             # Generate PDF
             return self.pdf_service.create_pdf_response(result, filename='routine.pdf')
         except RoutineGenerationError as e:
+            # Save failed generation history
+            try:
+                history_repo = GenerationHistoryRepository()
+                history_repo.create(
+                    timestamp=datetime.utcnow(),
+                    fitness_score=0.0,
+                    conflicts_count=0,
+                    generations_run=0,
+                    status='Failed',
+                    strategy_type=serializer.validated_data.get('strategy_type', 'genetic_algorithm'),
+                    parameters={
+                        'population_size': serializer.validated_data.get('population_size', 9),
+                        'max_generations': serializer.validated_data.get('max_generations', 1000),
+                        'mutation_rate': serializer.validated_data.get('mutation_rate', 0.1),
+                    },
+                    created_by=request.user.username if hasattr(request.user, 'username') else None
+                )
+            except Exception:
+                pass  # Don't fail if history save fails
+            
             return Response(
                 {'error': str(e.message)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
         except Exception as e:
+            # Save failed generation history
+            try:
+                history_repo = GenerationHistoryRepository()
+                history_repo.create(
+                    timestamp=datetime.utcnow(),
+                    fitness_score=0.0,
+                    conflicts_count=0,
+                    generations_run=0,
+                    status='Failed',
+                    strategy_type=serializer.validated_data.get('strategy_type', 'genetic_algorithm'),
+                    parameters=serializer.validated_data,
+                    created_by=request.user.username if hasattr(request.user, 'username') else None
+                )
+            except Exception:
+                pass  # Don't fail if history save fails
+            
             return Response(
                 {'error': 'PDF generation failed'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class DashboardStatsView(APIView):
+    """
+    API endpoint for dashboard statistics.
+    Following Dependency Inversion Principle - depends on service abstraction.
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.dashboard_service = DashboardService()
+    
+    def get(self, request):
+        """
+        Get dashboard statistics.
+        
+        GET /api/routine/dashboard/stats/
+        """
+        try:
+            stats = self.dashboard_service.get_dashboard_stats()
+            serializer = DashboardStatsSerializer(stats)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(
+                {'error': 'Failed to fetch dashboard statistics'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class SectionStatusView(APIView):
+    """
+    API endpoint for section assignment status.
+    Following Dependency Inversion Principle - depends on service abstraction.
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.dashboard_service = DashboardService()
+    
+    def get(self, request):
+        """
+        Get section assignment status.
+        
+        GET /api/routine/sections/status/
+        """
+        try:
+            status_data = self.dashboard_service.get_section_status()
+            serializer = SectionStatusSerializer(status_data)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(
+                {'error': 'Failed to fetch section status'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class GenerationHistoryView(APIView):
+    """
+    API endpoint for generation history.
+    Following Dependency Inversion Principle - depends on repository abstraction.
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.history_repo = GenerationHistoryRepository()
+    
+    def get(self, request):
+        """
+        Get generation history.
+        
+        GET /api/routine/dashboard/generation-history/
+        Query params: limit, offset, date_from, date_to
+        """
+        try:
+            limit = int(request.query_params.get('limit', 20))
+            offset = int(request.query_params.get('offset', 0))
+            date_from = request.query_params.get('date_from')
+            date_to = request.query_params.get('date_to')
+            
+            if date_from or date_to:
+                from datetime import datetime
+                date_from_obj = datetime.fromisoformat(date_from) if date_from else None
+                date_to_obj = datetime.fromisoformat(date_to) if date_to else None
+                history = self.history_repo.get_by_date_range(date_from_obj, date_to_obj)
+            else:
+                history = self.history_repo.get_latest(limit=limit + offset)
+            
+            # Apply pagination
+            paginated_history = history[offset:offset + limit]
+            
+            serializer = GenerationHistorySerializer(paginated_history, many=True)
+            return Response({
+                'count': len(history),
+                'results': serializer.data
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(
+                {'error': 'Failed to fetch generation history'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
