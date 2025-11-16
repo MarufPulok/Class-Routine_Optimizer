@@ -7,6 +7,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
+from mongoengine.errors import NotUniqueError, ValidationError as MongoValidationError
 
 from routine.models import Room, Instructor, MeetingTime, Course, Department, Section
 from routine.serializers import (
@@ -39,6 +40,71 @@ class RoomViewSet(viewsets.ModelViewSet):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.repository = RoomRepository()
+    
+    def create(self, request, *args, **kwargs):
+        """Create a room with proper error handling."""
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        try:
+            self.perform_create(serializer)
+            headers = self.get_success_headers(serializer.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        except NotUniqueError as e:
+            # Handle duplicate room number
+            error_msg = str(e)
+            if 'r_number' in error_msg:
+                return Response(
+                    {'error': 'A room with this room number already exists.', 'r_number': ['Room number must be unique.']},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            return Response(
+                {'error': 'Duplicate entry. This room already exists.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except MongoValidationError as e:
+            return Response(
+                {'error': 'Validation error', 'details': str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {'error': 'Failed to create room', 'details': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    def update(self, request, *args, **kwargs):
+        """Update a room with proper error handling."""
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        
+        try:
+            self.perform_update(serializer)
+            return Response(serializer.data)
+        except NotUniqueError as e:
+            # Handle duplicate room number
+            error_msg = str(e)
+            if 'r_number' in error_msg:
+                return Response(
+                    {'error': 'A room with this room number already exists.', 'r_number': ['Room number must be unique.']},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            return Response(
+                {'error': 'Duplicate entry. This room already exists.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except MongoValidationError as e:
+            return Response(
+                {'error': 'Validation error', 'details': str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {'error': 'Failed to update room', 'details': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 class InstructorViewSet(viewsets.ModelViewSet):
