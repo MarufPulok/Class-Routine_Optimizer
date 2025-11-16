@@ -17,10 +17,11 @@ router.register(r'departments', views.DepartmentViewSet, basename='department')
 router.register(r'sections', views.SectionViewSet, basename='section')
 
 urlpatterns = [
-    path('', include(router.urls)),
+    # Custom routes must come before router includes to avoid conflicts
+    path('sections/status/', views.SectionStatusView.as_view(), name='section-status'),
+    path('dashboard/stats/', views.DashboardStatsView.as_view(), name='dashboard-stats'),
+    path('dashboard/generation-history/', views.GenerationHistoryView.as_view(), name='generation-history'),
     path('generate/', views.RoutineGenerationView.as_view(), name='generate'),
     path('generate-pdf/', views.RoutinePDFGenerationView.as_view(), name='generate-pdf'),
-    path('dashboard/stats/', views.DashboardStatsView.as_view(), name='dashboard-stats'),
-    path('sections/status/', views.SectionStatusView.as_view(), name='section-status'),
-    path('dashboard/generation-history/', views.GenerationHistoryView.as_view(), name='generation-history'),
+    path('', include(router.urls)),
 ]
